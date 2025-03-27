@@ -5,6 +5,10 @@ const { Pool } = pg;
 import { users, projects, messages, aboutContent } from "@shared/schema";
 import { pgStorage } from "./pg-storage";
 
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
 // Check if we have database URL
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is required");

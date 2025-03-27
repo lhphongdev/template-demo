@@ -11,6 +11,10 @@ import {
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
 // Check if we have database URL
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is required");
