@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { pgStorage as storage } from "./pg-storage";
 import { 
   insertUserSchema, 
   insertProjectSchema, 
@@ -8,6 +8,14 @@ import {
   insertAboutContentSchema 
 } from "@shared/schema";
 import { z } from "zod";
+import session from "express-session";
+
+// Extend Express Request type to include our session properties
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -39,8 +47,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post("/api/auth/logout", (req: Request, res: Response) => {
-    req.session = null;
-    return res.status(200).json({ message: "Logout successful" });
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+          return res.status(500).json({ message: "Error logging out" });
+        }
+        return res.status(200).json({ message: "Logout successful" });
+      });
+    } else {
+      return res.status(200).json({ message: "Logout successful" });
+    }
   });
   
   app.get("/api/auth/status", (req: Request, res: Response) => {
